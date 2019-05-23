@@ -7,7 +7,7 @@ CXMLReader::CXMLReader(std::ostream &ou) : output(ou)
 
 CXMLReader::~CXMLReader()
 {
-    
+    XML_ParserFree(&Parser);
 }
 
 

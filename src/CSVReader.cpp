@@ -31,6 +31,8 @@ bool CCSVReader::ReadRow(std::vector<std::string> &row)
     std::stringstream inCopy = in;
     inCopy.seekg(0, inCopy.end);
     int nBytes = inCopy.tellg();
-    csv_parse(Parser, row, nBytes, CallbackField(), CallbackRow()/*c*/, in, in);
-    csv_fini(Parser, CallbackField(), CallbackRow(/*c*/, in), in);
+    csv_parse(Parser, row, nBytes, CallbackField(row, nBytes, in), CallbackRow(int c, in) in);
+    csv_fini(Parser, CallbackField(row, nBytes, in), CallbackRow(int c, in), in);
+    
+    return true;
 }
