@@ -51,8 +51,9 @@ $(LIBCSVDIR)/libcsv.la: $(LIBCSVDIR)/Makefile
 $(LIBDIR)/$(LIBCSV_NAME): $(LIBCSVDIR)/libcsv.la
 	cd $(LIBCSVDIR); make install; cd ..
 
-$clean:
-	rm -f $(LIBDIR)/*
+directories: $(BINDIR) $(TESTBINDIR) $(OBJDIR)
+clean:
+	rm -f lib/*
 	rm -f include/csv.h
 	cd $(LIBCSVDIR); make clean; cd ..
 	rm -f $(LIBCSVIDR)/Makefile
