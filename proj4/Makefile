@@ -12,7 +12,7 @@ LIBCSV_NAME = libcsv.a
 
 INCLUDE = -I $(INCLUDEDIR) -I ./googletest/googletest/include 
 CXXFLAGS = -std=c++14 $(INCLUDE)
-TESTLDFLAGS = -L /opt/local/lib -L ./googletest/build/lib -lgtest_main -lgtest
+TESTLDFLAGS = -L /opt/local/lib -L ./googletest/googletest/lib -lgtest_main -lgtest
 
 STRING_UTILS_OBJ = $(OBJDIR)/StringUtils.o
 CSV_READER_OBJ = $(OBJDIR)/CSVReader.o
@@ -21,11 +21,13 @@ CSV_TEST_OBJ = $(OBJDIR)/CSVTest.o
 XML_READER_OBJ = $(OBJDIR)/XMLReader.o
 XML_WRITER_OBJ = $(OBJDIR)/XMLWriter.o
 XML_TEST_OBJ = $(OBJDIR)/XMLTest.o
+MAIN_OBJ = $(OBJDIR)/Main.o
 
 CSV_TEST_NAME = CSVTest
 XML_TEST_NAME = XMLTest
+XML_TEST_NAME = Main
 
-all: $(LIBDIR)/$(LIBCSV_NAME) directories runtest
+all: $(LIBDIR)/$(LIBCSV_NAME) directories runtest $(TESTBINDIR)/$(MAIN_NAME)
 
 runtest: $(TESTBINDIR)/$(CSV_TEST_NAME) $(TESTBINDIR)/$(XML_TEST_NAME)
 	$(TESTBINDIR)/$(CSV_TEST_NAME)
@@ -58,6 +60,12 @@ $(XML_TEST_OBJ): $(SRCDIR)/XMLTest.cpp $(INCLUDEDIR)/XMLReader.h $(INCLUDEDIR)/X
 
 $(TESTBINDIR)/$(XML_TEST_NAME): $(XML_READER_OBJ) $(XML_WRITER_OBJ) $(XML_TEST_OBJ)
 	$(CXX) $(XML_READER_OBJ) $(XML_WRITER_OBJ) $(XML_TEST_OBJ) $(CXXFLAGS) $(TESTLDFLAGS) -o $(TESTBINDIR)/$(XML_TEST_NAME)
+
+$(MAIN_OBJ): $(SRCDIR)/Main.cpp 
+	$(CXX) $(SRCDIR)/Main.cpp -c $(CXXFLAGS) -o $(MAIN_OBJ)
+
+$(TESTBINDIR)/$(MAIN_NAME): $(MAIN_OBJ) $(XML_READER_OBJ) $(XML_WRITER_OBJ) $(CSV_READER_OBJ) $(CSV_WRITER_OBJ) $(LIBDIR)/$(LIBCSV_NAME)
+	$(CXX) $(MAIN_OBJ) $(XML_READER_OBJ) $(XML_WRITER_OBJ) $(CSV_READER_OBJ) $(CSV_WRITER_OBJ) $(CXXFLAGS) $(TESTLDFLAGS) -o $(TESTBINDIR)/$(MAIN_NAME)
 
 $(LIBCSVDIR)/Makefile:
 	cd $(LIBCSVDIR); ./configure --prefix=$(CURDIR); cd ..
