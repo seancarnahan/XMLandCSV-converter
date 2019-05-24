@@ -3,17 +3,18 @@
 
 #include "XMLEntity.h"
 #include <stack>
-#include <istream>
+#include <iostream>
 
 class CXMLWriter{
-    private:
-        
-    public:
-        CXMLWriter(std::ostream &os);
-        ~CXMLWriter();
-        
-        bool Flush();
-        bool WriteEntity(const SXMLEntity &entity);
+ private:
+  std::ostream &out;
+  
+ public:
+  CXMLWriter(std::ostream &os);
+  ~CXMLWriter();
+  
+  bool Flush();
+  bool WriteEntity(const SXMLEntity &entity);
 };
 
 #endif

@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+
+
 struct SXMLEntity{
     using TAttribute = std::pair< std::string, std::string >;
     enum class EType{StartElement, EndElement, CharData, CompleteElement};

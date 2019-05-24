@@ -10,9 +10,9 @@ SRCDIR = ./src
 LIBCSVDIR = libcsv-3.0.3
 LIBCSV_NAME = libcsv.a
 
-INCLUDE = -I $(INCLUDEDIR)
+INCLUDE = -I $(INCLUDEDIR) -I ./googletest/googletest/include 
 CXXFLAGS = -std=c++14 $(INCLUDE)
-TESTLDFLAGS = -L opt/local/lib -lgtest_main -lgtest
+TESTLDFLAGS = -L /opt/local/lib -L ./googletest/build/lib -lgtest_main -lgtest
 
 STRING_UTILS_OBJ = $(OBJDIR)/StringUtils.o
 CSV_READER_OBJ = $(OBJDIR)/CSVReader.o
@@ -27,8 +27,13 @@ XML_TEST_NAME = XMLTest
 
 all: $(LIBDIR)/$(LIBCSV_NAME) directories runtest
 
-runtest: $(TESTBINDIR)/$(CSV_TEST_NAME)
+runtest: $(TESTBINDIR)/$(CSV_TEST_NAME) $(TESTBINDIR)/$(XML_TEST_NAME)
 	$(TESTBINDIR)/$(CSV_TEST_NAME)
+	$(TESTBINDIR)/$(XML_TEST_NAME)
+
+directories:
+	mkdir -p $(OBJDIR)
+	mkdir -p $(TESTBINDIR)
 
 $(CSV_READER_OBJ): $(SRCDIR)/CSVReader.cpp $(INCLUDEDIR)/CSVReader.h
 	$(CXX) $(SRCDIR)/CSVReader.cpp -c $(CXXFLAGS) -o $(CSV_READER_OBJ)
@@ -39,8 +44,20 @@ $(CSV_WRITER_OBJ): $(SRCDIR)/CSVWriter.cpp $(INCLUDEDIR)/CSVWriter.h
 $(CSV_TEST_OBJ): $(SRCDIR)/CSVTest.cpp $(INCLUDEDIR)/CSVReader.h $(INCLUDEDIR)/CSVWriter.h
 	$(CXX) $(SRCDIR)/CSVTest.cpp -c $(CXXFLAGS) -o $(CSV_TEST_OBJ)
 
-$(TESTBINDIR)/$(CSV_TEST_NAME): $(CSV_READER_OBJ) $(CSV_WRITER_OBJ) $(CSV_TEST_OBJ) $(STRING_UTILS_OBJ) $(LIBDIR)/$(LIBCSV_NAME)
-	$(CXX) $(CSV_READER_OBJ) $(CSV_WRITER_OBJ) $(CSV_TEST_OBJ) $(LIBDIR)/$(LIBCSV_NAME) $(CXXFLAGS) $(TESTLDFLAGS) -o $(TESTBINDIR)/$(CSV_TEST_NAME)
+$(TESTBINDIR)/$(CSV_TEST_NAME): $(CSV_READER_OBJ) $(CSV_WRITER_OBJ) $(CSV_TEST_OBJ) $(LIBDIR)/$(LIBCSV_NAME)
+	$(CXX) $(CSV_READER_OBJ) $(CSV_WRITER_OBJ) $(CSV_TEST_OBJ) /usr/local/lib/$(LIBCSV_NAME) $(CXXFLAGS) $(TESTLDFLAGS) -o $(TESTBINDIR)/$(CSV_TEST_NAME)
+
+$(XML_READER_OBJ): $(SRCDIR)/XMLReader.cpp $(INCLUDEDIR)/XMLReader.h
+	$(CXX) $(SRCDIR)/XMLReader.cpp -c $(CXXFLAGS) -o $(XML_READER_OBJ)
+
+$(XML_WRITER_OBJ): $(SRCDIR)/XMLWriter.cpp $(INCLUDEDIR)/XMLWriter.h
+	$(CXX) $(SRCDIR)/XMLWriter.cpp -c $(CXXFLAGS) -o $(XML_WRITER_OBJ)
+
+$(XML_TEST_OBJ): $(SRCDIR)/XMLTest.cpp $(INCLUDEDIR)/XMLReader.h $(INCLUDEDIR)/XMLWriter.h
+	$(CXX) $(SRCDIR)/XMLTest.cpp -c $(CXXFLAGS) -o $(XML_TEST_OBJ)
+
+$(TESTBINDIR)/$(XML_TEST_NAME): $(XML_READER_OBJ) $(XML_WRITER_OBJ) $(XML_TEST_OBJ)
+	$(CXX) $(XML_READER_OBJ) $(XML_WRITER_OBJ) $(XML_TEST_OBJ) $(CXXFLAGS) $(TESTLDFLAGS) -o $(TESTBINDIR)/$(XML_TEST_NAME)
 
 $(LIBCSVDIR)/Makefile:
 	cd $(LIBCSVDIR); ./configure --prefix=$(CURDIR); cd ..
@@ -51,8 +68,10 @@ $(LIBCSVDIR)/libcsv.la: $(LIBCSVDIR)/Makefile
 $(LIBDIR)/$(LIBCSV_NAME): $(LIBCSVDIR)/libcsv.la
 	cd $(LIBCSVDIR); make install; cd ..
 
-$clean:
+clean:
 	rm -f $(LIBDIR)/*
 	rm -f include/csv.h
 	cd $(LIBCSVDIR); make clean; cd ..
 	rm -f $(LIBCSVIDR)/Makefile
+	rm -r $(OBJDIR)
+	rm -r $(TESTBINDIR)
