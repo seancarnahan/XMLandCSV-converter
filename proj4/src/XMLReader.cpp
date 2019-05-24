@@ -1,45 +1,71 @@
 #include "XMLReader.h"
 
-CXMLReader::CXMLReader(std::istream &in) : input(in)
-{
-    XML_ParserCreate(NULL);
+void StartElementHandler (void *data, const XML_Char *name, const XML_Char **atts) {
+  CXMLReader *ptr = static_cast<CXMLReader*>(data);
+  //std::cout << "StartElementHandler: " << name << "\n";
+
+  SXMLEntity entity;
+
+  //not sure how to get the type here
+  //courseEntity.DType = SXMLEntity::EType::StartElement;
+  entity.DNameData = name;
+
+  //attributes come as an flattened array - need to pair things up
+  //TODO: error checking around the pointers
+  while (*atts != NULL) {
+    //std::cout << "StartElementHandler: attr " << *atts << "\n";
+    std::string attrName = *atts;
+    atts++;
+    std::string attrValue = *atts;
+    atts++;
+    entity.SetAttribute(attrName, attrValue);
+  }
+  ptr->entities.push_back(entity);
+  
+}
+
+
+void EndElementHandler(void *data, const XML_Char *name) {
+  //std::cout << "EndElementHandler: " << name << "\n";
+}
+
+CXMLReader::CXMLReader(std::istream &in) : input(in) {
+
+  
+  //this is a DOM parser so parse the whole thing in the constructor
+  XML_Parser parser = XML_ParserCreate(NULL);
+  XML_SetUserData(parser, this);
+  XML_SetElementHandler(parser, StartElementHandler, EndElementHandler);
+  
+  std::string buffer;
+  while (std::getline(input, buffer)) {
+    //std::cout << "Constructor: read line [" << buffer << "]\n";
+    if (XML_Parse(parser, buffer.c_str(), buffer.length(), XML_FALSE) == XML_STATUS_ERROR) {
+      std::cerr << "Could not read file\n";
+    }
+  }
+  //std::cout << "Constructor: read " << entities.size() << " entities\n";
+  XML_ParserFree(parser);
 }
 
 CXMLReader::~CXMLReader()
 {
-    XML_ParserFree(&parser);
+    
 }
-
-void CXMLReader::StartElementHandler(void *data, const XML_Char *name, const XML_Char **atts)
-{
-
-}
-
-void CXMLReader::EndElementHandler(void *data, const XML_Char *name)
-{
-
-}
-
-void CXMLReader::CharacterHandler(
 
 bool CXMLReader::End()
 {
     return input.eof();
 }
 
-bool CXMLReader::ReadEntity(const SXMLEntity &entity)
-//from github.com/libexpat/libexpat/blob/master/expat/examples/outline.c "xml_parse"
-{
-    char *entityBuffer;
-    int len = (int)fread(entityBuffer, 0, input.end.tellg(), input);
-    XML_SetElementHandler(parser, start, end);
+bool CXMLReader::ReadEntity(SXMLEntity &entity, bool skipcdata) {
+  if (entityIdx < entities.size()) {
+    entity = entities[entityIdx];
+    entityIdx++;
+    return true;
+  } else {
+    return false;
+  }
+  
 
-    XML_SetCharacterHandler(parser, charhndl);
-
-    if(XML_Parse(parser, entityBuffer, len, (int)input.eof()) == XML_STATUS_ERROR){
-        cerr << "Parse error @ line: " << XML_GetCurrentLineNumber(parser); << "\n" << XML_ErrorString(XML_GetErrorCode(parser));
-        return false;
-    }
-
-    else return true;
 }

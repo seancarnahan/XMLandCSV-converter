@@ -4,19 +4,23 @@
 
 #include "XMLEntity.h"
 #include <istream>
+#include <iostream>
 #include <expat.h>
+#include <vector>
+
 
 class CXMLReader{
-    private:
-    std::istream &input;
-    XML_Parser parser;
-
-    public:
-        CXMLReader(std::istream &is);
-        ~CXMLReader();
-
-        bool End();
-        bool ReadEntity(SXMLEntity &entity, bool skipcdata = false);
+ private:
+  std::istream &input;
+  
+ public:
+  CXMLReader(std::istream &is);
+  ~CXMLReader();
+  std::vector<SXMLEntity> entities;
+  int entityIdx = 0;
+  
+  bool End();
+  bool ReadEntity(SXMLEntity &entity, bool skipcdata = false);
 };
 
 #endif

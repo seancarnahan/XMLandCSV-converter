@@ -6,13 +6,15 @@
 #include <vector>
 
 class CCSVWriter{
-    protected:
+ private:
+  std::ostream &output;
+ protected:
 
-    public:
-        CCSVWriter(std::ostream &ou);
-        ~CCSVWriter();
-
-        bool WriteRow(const std::vector< std::string > &row);
+ public:
+  CCSVWriter(std::ostream &ou);
+  ~CCSVWriter();
+  
+  bool WriteRow(const std::vector< std::string > &row);
 };
 
 #endif
