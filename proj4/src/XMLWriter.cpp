@@ -39,10 +39,26 @@ bool CXMLWriter::WriteEntity(const SXMLEntity &entity) {
       out << " "+std::get<0>(attr)+"=\""+std::get<1>(attr)+"\"";
     }
     out << ">";
-    
+
+  } else if(entity.DType == SXMLEntity::EType::EndElement) {
+
+    //output
+    out << "</"+entity.DNameData;
+    out << ">";
+
+  } else if (entity.DType == SXMLEntity::EType::CharData) {
+
+    return false;
+
+  } else if (entity.DType == SXMLEntity::EType::CompleteElement) {
+
+    out << "<"+entity.DNameData;
+    for (auto attr : entity.DAttributes) {
+      out << " "+std::get<0>(attr)+"=\""+std::get<1>(attr)+"\"";
+    }
+    out << "/>";
   }
 
-
   return true;
-  
+
 }
