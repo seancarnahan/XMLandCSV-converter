@@ -11,7 +11,7 @@
 int main (int argc, char* argv[]) {
   //get the name of the file
 
-  const std::vector<std::string> HEADERS = {  
+  const std::vector<std::string> HEADERS = {
     "SEAT", //The seat number of the student
     "SID", //The student ID
     "SURNAME", //The last name of the student
@@ -23,10 +23,10 @@ int main (int argc, char* argv[]) {
     "GRADE", //The grade the student received in the course
     "STATUS", //The student’s registration status
     "EMAIL"}; //The student’s e-mail address
-  
+
   std::string CSV_ENDING(".csv");
   std::string XML_ENDING(".xml");
-  
+
   if (argc < 2) {
     std::cerr << "Syntax Error: Main <path to file>\n";
     return 1;
@@ -39,7 +39,7 @@ int main (int argc, char* argv[]) {
 
   //determine if csv of xml based on the name of the file
   if (std::equal(CSV_ENDING.rbegin(), CSV_ENDING.rend(), filename.rbegin())) {
-    
+
     //get the subj, crse, sec from the name of the file
     //TODO: need to do error checking here
     int lastpos = 0;
@@ -57,10 +57,11 @@ int main (int argc, char* argv[]) {
 
     //initialize things
     std::ifstream input(filename);
+    std::ofstream output(filename + ".otherxt");
     CCSVReader reader(input);
-    CXMLWriter xml(std::cout);
+    CXMLWriter xml(output);
     std::vector<std::string> row;
-    
+
     //write the courseEntity using xml writer
     SXMLEntity courseEntity;
     courseEntity.DType = SXMLEntity::EType::StartElement;
@@ -69,7 +70,7 @@ int main (int argc, char* argv[]) {
     courseEntity.SetAttribute("CRSE", crse);
     courseEntity.SetAttribute("SEC", sec);
     xml.WriteEntity(courseEntity);
-    
+
     //read first row to get the names of fields
     row.clear();
     reader.ReadRow(row);
@@ -98,7 +99,7 @@ int main (int argc, char* argv[]) {
     reader.End();
     input.close();
     std::cout << "\n";
-    
+
   } else if (std::equal(XML_ENDING.rbegin(), XML_ENDING.rend(), filename.rbegin())) {
     std::ifstream input(filename);
     CXMLReader reader(input);
@@ -114,10 +115,10 @@ int main (int argc, char* argv[]) {
     std::cerr << "COURSE: " << courseEntity.AttributeValue("SUBJ") << " "
 	      << courseEntity.AttributeValue("CRSE")
 	      << " " << courseEntity.AttributeValue("SEC") << "\n";
-    
+
     //write the headers
     csv.WriteRow(HEADERS);
-    
+
     //write out all of the students
     SXMLEntity studentEntity;
     while (reader.ReadEntity(studentEntity)) {
@@ -140,7 +141,7 @@ int main (int argc, char* argv[]) {
     std::cerr << "Input Error: file must end with .xml or .csv\n";
     return 1;
   }
-  
+
   return 0;
 
 }

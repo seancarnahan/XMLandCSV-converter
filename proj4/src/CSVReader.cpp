@@ -17,7 +17,7 @@ void CallbackField(void *str, size_t len, void *data)
   std::string buf = std::string((char *)str, len);
   //std::cout << "CallbackField: " << buf << "\n";
   Ptr->rowBuffer.push_back(buf);
-  
+
 }
 
 void CallbackRow(int c, void *data)
@@ -44,20 +44,20 @@ bool CCSVReader::ReadRow(std::vector<std::string> &row)
   if (std::getline(input, buffer)) {
 
     //std::cout << "Read line: [" << buffer << "]\n";
-    
+
     //parse the line into rowBuffer (member variable)
     rowBuffer.clear();
-    csv_parse(&parser, &buffer, buffer.size()+1, CallbackField, CallbackRow, this);
+    csv_parse(&parser, buffer.c_str(), buffer.length(), CallbackField, CallbackRow, this);
     csv_fini(&parser, CallbackField, CallbackRow, this);
-    
+
     //copy rowBuffer into the row parameter
     row = rowBuffer;
-    
+
     return true;
-  
+
   } else {
     return false;
   }
   // csv_fini(&parser, CallbackField, CallbackRow, this);
-  
+
 }
